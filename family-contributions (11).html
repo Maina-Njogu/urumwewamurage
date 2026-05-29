@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Urumwe Wa Murage</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f2ee;--surface:#fff;--surface2:#f9f7f4;--border:#e8e2d9;
+  --text:#1a1714;--muted:#8c8279;--accent:#2d6a4f;--accent-light:#d8f3dc;
+  --gold:#b5830a;--red:#c0392b;--red-light:#fdf0ef;--blue:#1a5276;
+  --radius:12px;--radius-sm:8px;--font:'Plus Jakarta Sans',sans-serif;--font-display:'Fraunces',serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;min-height:100vh}
+header{background:var(--accent);color:#fff;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:62px;position:sticky;top:0;z-index:100;gap:12px}
+.logo{font-family:var(--font-display);font-size:20px;white-space:nowrap}
+.logo small{font-family:var(--font);font-size:13px;font-weight:400;opacity:0.65;margin-left:8px}
+.hright{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.sync-pill{font-size:12px;padding:4px 10px;border-radius:99px;border:1px solid rgba(255,255,255,0.3);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:50%;background:#4caf7d;flex-shrink:0}
+.dot.off{background:#e05a5a}.dot.spin{background:#f9a825;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+select.msel{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:var(--radius-sm);color:#fff;font-family:var(--font);font-size:13px;padding:6px 10px;cursor:pointer}
+select.msel option{background:#2d6a4f}
+.pin-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:var(--radius-sm);color:#fff;font-family:var(--font);font-size:12px;font-weight:600;padding:6px 12px;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:all .15s}
+.pin-btn:hover{background:rgba(255,255,255,0.25)}
+.pin-btn.unlocked{background:rgba(76,175,125,0.35);border-color:rgba(76,175,125,0.6)}
+.wrap{display:grid;grid-template-columns:210px 1fr;min-height:calc(100vh - 62px)}
+aside{background:var(--surface);border-right:1px solid var(--border);padding:1.25rem 0.75rem;display:flex;flex-direction:column;gap:2px}
+.nlbl{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:0 10px;margin:14px 0 5px;font-weight:600}
+.nb{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--radius-sm);background:none;border:none;color:var(--muted);font-size:13px;font-family:var(--font);font-weight:500;cursor:pointer;width:100%;text-align:left;transition:all .15s}
+.nb:hover{background:var(--surface2);color:var(--text)}
+.nb.on{background:var(--accent-light);color:var(--accent);font-weight:600}
+.nb svg{width:16px;height:16px;flex-shrink:0;stroke-width:2}
+.nc{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px}
+main{padding:1.75rem;overflow-y:auto}
+.pg{display:none}.pg.on{display:block}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;min-height:40px}
+.pt{font-family:var(--font-display);font-size:24px;font-weight:700;letter-spacing:-0.5px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--radius-sm);border:none;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+.bp{background:var(--accent);color:#fff}.bp:hover{background:#245a42}
+.bs{background:var(--surface);color:var(--text);border:1px solid var(--border)}.bs:hover{background:var(--surface2)}
+.btn svg{width:14px;height:14px;stroke-width:2.5}
+.vob{background:#fff8e1;border:1px solid #f0c040;border-radius:var(--radius-sm);padding:8px 14px;font-size:12.5px;color:#7a5c00;display:flex;align-items:center;gap:8px;margin-bottom:1rem}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:1.5rem}
+.mc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.1rem;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.mc.g{border-left:3px solid var(--accent)}.mc.o{border-left:3px solid var(--gold)}
+.mc.b{border-left:3px solid var(--blue)}.mc.r{border-left:3px solid var(--red)}
+.ml{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:7px}
+.mv{font-size:22px;font-weight:700;font-family:var(--font-display);letter-spacing:-.5px}
+.ms{font-size:12px;color:var(--muted);margin-top:3px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.4rem;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:1rem}
+.ct{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:1rem}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fg .full{grid-column:1/-1}
+.fg label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px}
+.fg input,.fg select{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:14px;padding:9px 11px;width:100%;transition:border-color .15s}
+.fg input:focus,.fg select:focus{outline:none;border-color:var(--accent)}
+.fg input::placeholder{color:#bbb}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.8px;font-weight:600;padding:7px 11px;border-bottom:1px solid var(--border)}
+td{padding:10px 11px;border-bottom:1px solid #f0ece6;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+.bx{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px}
+.bx.paid{background:var(--accent-light);color:var(--accent)}.bx.unpaid{background:var(--red-light);color:var(--red)}
+.bx.mpesa{background:#e8f5e9;color:#2e7d32}.bx.cash{background:#fff8e1;color:#f57f17}.bx.bank{background:#e3f2fd;color:#1565c0}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-bottom:1rem}
+.mcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;box-shadow:0 1px 3px rgba(0,0,0,.06);transition:all .2s;position:relative}
+.mcard:hover{border-color:var(--accent);transform:translateY(-2px)}
+.av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;margin-bottom:9px;font-family:var(--font-display)}
+.mst{position:absolute;top:10px;right:10px;width:8px;height:8px;border-radius:50%}
+.mst.p{background:var(--accent)}.mst.u{background:var(--red)}
+.mname{font-weight:700;font-size:13.5px;margin-bottom:2px}
+.mphone{font-size:11.5px;color:var(--muted)}
+.mtot{font-size:12.5px;font-weight:600;color:var(--accent);margin-top:7px}
+.mbtns{display:flex;gap:5px;margin-top:9px}
+.mbtns button{flex:1;padding:5px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .15s}
+.mbtns button:hover{background:var(--accent-light);color:var(--accent);border-color:var(--accent)}
+.ov{position:fixed;inset:0;background:rgba(26,23,20,.55);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .2s}
+.ov.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border-radius:var(--radius);padding:1.6rem;width:100%;max-width:460px;max-height:90vh;overflow-y:auto;transform:translateY(10px);transition:transform .2s;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.ov.open .modal{transform:translateY(0)}
+.mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem}
+.mt{font-family:var(--font-display);font-size:19px;font-weight:700}
+.mc-btn{background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);padding:4px 8px;border-radius:6px}
+.mc-btn:hover{background:var(--surface2);color:var(--text)}
+.ma{display:flex;gap:9px;margin-top:1.1rem;justify-content:flex-end}
+.pin-inputs{display:flex;gap:10px;justify-content:center;margin:1.25rem 0}
+.pin-inputs input{width:54px;height:58px;text-align:center;font-size:24px;font-weight:700;border:2px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-family:var(--font-display);transition:border-color .15s}
+.pin-inputs input:focus{outline:none;border-color:var(--accent)}
+.pin-err{color:var(--red);font-size:13px;text-align:center;min-height:20px;margin-top:4px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--accent);color:#fff;font-weight:600;font-size:13px;padding:9px 20px;border-radius:99px;opacity:0;transition:all .3s;pointer-events:none;z-index:999;white-space:nowrap;box-shadow:0 4px 20px rgba(45,106,79,.35)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.empty{text-align:center;color:var(--muted);padding:2.5rem 1rem;font-size:14px}
+.pw{margin-bottom:11px}
+.pm{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.pn{font-weight:600;color:var(--text)}.pv{color:var(--muted)}
+.pt2{height:6px;background:#ede8e1;border-radius:99px;overflow:hidden}
+.pf{height:100%;border-radius:99px;transition:width .4s}
+.hi{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
+.hi:last-child{border-bottom:none}
+.ui{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--border)}
+.ui:last-child{border-bottom:none}
+.ldr{position:fixed;inset:0;background:rgba(245,242,238,.92);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.lsp{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ltxt{font-family:var(--font-display);font-size:17px;color:var(--accent)}
+.xbtn{background:none;border:none;color:#ccc;cursor:pointer;font-size:15px;padding:3px 6px;border-radius:5px;transition:all .15s}
+.search-wrap{position:relative;margin-bottom:1rem}
+.search-wrap input{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px 9px 36px;width:100%;font-size:13.5px;font-family:var(--font);color:var(--text)}
+.search-wrap input:focus{outline:none;border-color:var(--accent)}
+.search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);width:16px;height:16px}
+.xbtn:hover{background:var(--red-light);color:var(--red)}
+@media(max-width:768px){
+  .wrap{grid-template-columns:1fr}
+  aside{flex-direction:row;flex-wrap:wrap;padding:.6rem;border-right:none;border-bottom:1px solid var(--border);position:sticky;top:62px;z-index:50}
+  .nlbl{display:none}.g2{grid-template-columns:1fr}
+  .fg{grid-template-columns:1fr}.fg .full{grid-column:1}
+  main{padding:1rem}.metrics{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" style="position:fixed;inset:0;background:var(--accent);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem">
+  <div style="text-align:center;color:#fff;margin-bottom:2rem">
+    <div style="font-family:var(--font-display);font-size:32px;font-weight:700;letter-spacing:-1px;margin-bottom:6px">Urumwe Wa Murage</div>
+    <div style="font-size:14px;opacity:0.7">Family Contributions Tracker</div>
+  </div>
+  <div style="background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:320px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.2)">
+    <div style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--text);margin-bottom:6px" id="loginTitle">Enter PIN to Access</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:1.25rem" id="loginSub">Enter your member PIN to view contributions</div>
+    <div class="pin-inputs">
+      <input type="password" inputmode="numeric" maxlength="1" id="lp1" oninput="lpnext(this,'lp2')" onkeydown="lpkey(event,null,'lp1')">
+      <input type="password" inputmode="numeric" maxlength="1" id="lp2" oninput="lpnext(this,'lp3')" onkeydown="lpkey(event,'lp1','lp2')">
+      <input type="password" inputmode="numeric" maxlength="1" id="lp3" oninput="lpnext(this,'lp4')" onkeydown="lpkey(event,'lp2','lp3')">
+      <input type="password" inputmode="numeric" maxlength="1" id="lp4" oninput="lpnext(this,null)" onkeydown="lpkey(event,'lp3','lp4')">
+    </div>
+    <div class="pin-err" id="lerr" style="margin-bottom:1rem"></div>
+    <button class="btn bp" style="width:100%;justify-content:center;padding:11px" onclick="checkLoginPIN()">Access Dashboard</button>
+  </div>
+  <div style="color:rgba(255,255,255,0.5);font-size:12px;margin-top:1.5rem">Protected — members only</div>
+</div>
+
+<div class="ldr" id="ldr">
+  <div class="lsp"></div>
+  <div class="ltxt">Connecting to Urumwe Wa Murage...</div>
+</div>
+
+<div id="appShell" style="display:none"><header>
+  <div class="logo">Urumwe Wa Murage <small>Family Contributions</small></div>
+  <div class="hright">
+    <div class="sync-pill"><div class="dot spin" id="sdot"></div><span id="stxt">Connecting...</span></div>
+    <select class="msel" id="gmonth" onchange="refresh()"></select>
+    <button class="pin-btn" id="pinBtn" onclick="openPIN()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span id="pinBtnTxt">Admin Login</span>
+    </button>
+  </div>
+</header>
+
+<div class="wrap">
+  <aside>
+    <div class="nlbl">Overview</div>
+    <button class="nb on" onclick="nav('dash',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>Dashboard
+    </button>
+    <button class="nb" onclick="nav('members',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Members <span class="nc" id="mcnt">0</span>
+    </button>
+    <button class="nb" onclick="nav('contribs',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Contributions
+    </button>
+    <div class="nlbl">Reports</div>
+    <button class="nb" onclick="nav('unpaid',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Unpaid <span class="nc" id="ucnt" style="background:var(--red)">0</span>
+    </button>
+    <div class="nlbl">Tools</div>
+    <button class="nb" onclick="exportCSV()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV
+    </button>
+  </aside>
+
+  <main>
+    <!-- DASHBOARD -->
+    <div id="pg-dash" class="pg on">
+      <div class="ph">
+        <div class="pt">Overview</div>
+        <div id="dashAddBtn"></div>
+      </div>
+      <div id="dashVOB"></div>
+      <div class="metrics">
+        <div class="mc g"><div class="ml">Collected This Month</div><div class="mv" id="d-col">KES 0</div><div class="ms" id="d-mlbl">—</div></div>
+        <div class="mc o"><div class="ml">Total All Time</div><div class="mv" id="d-tot">KES 0</div><div class="ms">all months</div></div>
+        <div class="mc b"><div class="ml">Members Paid</div><div class="mv" id="d-paid">0</div><div class="ms" id="d-psub">this month</div></div>
+        <div class="mc r"><div class="ml">Yet to Pay</div><div class="mv" id="d-unp">0</div><div class="ms">this month</div></div>
+      </div>
+      <div class="g2">
+        <div class="card"><div class="ct">Monthly Chart</div><div style="position:relative;height:200px"><canvas id="chart"></canvas></div></div>
+        <div class="card"><div class="ct">Running Totals</div><div id="rtots"><div class="empty">Loading...</div></div></div>
+      </div>
+      <div class="card"><div class="ct">This Month's Status</div><div id="mstatus"><div class="empty">Loading...</div></div></div>
+    </div>
+
+    <!-- MEMBERS -->
+    <div id="pg-members" class="pg">
+      <div class="ph">
+        <div class="pt">Members</div>
+        <div id="memberAddBtn"></div>
+      </div>
+      <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="memberSearch" placeholder="Search members..." oninput="filterMembers()"></div>
+      <div class="mgrid" id="mgrid"><div class="empty" style="grid-column:1/-1">Loading...</div></div>
+    </div>
+
+    <!-- CONTRIBUTIONS -->
+    <div id="pg-contribs" class="pg">
+      <div class="ph">
+        <div class="pt">All Contributions</div>
+        <div id="contribAddBtn"></div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden"><div id="ctable"><div class="empty" style="padding:2.5rem">Loading...</div></div></div>
+    </div>
+
+    <!-- UNPAID -->
+    <div id="pg-unpaid" class="pg">
+      <div class="ph"><div class="pt">Unpaid Members</div></div>
+      <div class="card"><div class="ct">Not paid — <span id="ulbl"></span></div><div id="ulist"><div class="empty">Loading...</div></div></div>
+    </div>
+  </main>
+</div>
+
+</div><!-- /appShell -->
+<!-- MEMBER MODAL -->
+<div class="ov" id="movm">
+  <div class="modal">
+    <div class="mh"><div class="mt" id="mmtitle">Add Member</div><button class="mc-btn" onclick="closeOv('movm')">&#x2715;</button></div>
+    <div class="fg">
+      <div class="full"><label>Full Name</label><input type="text" id="mn" placeholder="e.g. Grace Mwangi"></div>
+      <div><label>Phone Number</label><input type="tel" id="mp" placeholder="0712 345 678"></div>
+      <div><label>Role</label><select id="mr"><option>Member</option><option>Admin</option><option>Treasurer</option><option>Chairperson</option></select></div>
+    </div>
+    <input type="hidden" id="meid">
+    <div class="ma"><button class="btn bs" onclick="closeOv('movm')">Cancel</button><button class="btn bp" onclick="saveMember()">Save Member</button></div>
+  </div>
+</div>
+
+<!-- CONTRIBUTION MODAL -->
+<div class="ov" id="movc">
+  <div class="modal">
+    <div class="mh"><div class="mt">Record Contribution</div><button class="mc-btn" onclick="closeOv('movc')">&#x2715;</button></div>
+    <div class="fg">
+      <div class="full"><label>Search Member</label><div class="search-wrap" style="margin-bottom:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="cmSearch" placeholder="Type to filter members..." oninput="filterContribSelect()"></div></div>
+      <div class="full"><label>Member</label><select id="cm" size="5" style="border-radius:var(--radius-sm);padding:4px"></select></div>
+      <div><label>Amount (KES)</label><input type="number" id="ca" placeholder="0" min="1"></div>
+      <div><label>Month</label><input type="month" id="cmo"></div>
+      <div><label>Payment Method</label><select id="cme"><option>M-Pesa</option><option>Cash</option><option>Bank Transfer</option><option>Other</option></select></div>
+      <div><label>Recorded By</label><input type="text" id="cr" placeholder="Your name"></div>
+    </div>
+    <div class="ma"><button class="btn bs" onclick="closeOv('movc')">Cancel</button><button class="btn bp" onclick="saveContrib()">Save Contribution</button></div>
+  </div>
+</div>
+
+<!-- HISTORY MODAL -->
+<div class="ov" id="movh">
+  <div class="modal">
+    <div class="mh"><div class="mt" id="hmtitle">History</div><button class="mc-btn" onclick="closeOv('movh')">&#x2715;</button></div>
+    <div id="hcontent"></div>
+  </div>
+</div>
+
+<!-- PIN MODAL -->
+<div class="ov" id="movpin">
+  <div class="modal" style="max-width:320px;text-align:center">
+    <div class="mh" style="justify-content:center;position:relative">
+      <div class="mt">Admin Login</div>
+      <button class="mc-btn" style="position:absolute;right:0" onclick="closeOv('movpin')">&#x2715;</button>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:.5rem">Enter your 4-digit PIN to unlock editing</p>
+    <div class="pin-inputs">
+      <input type="password" inputmode="numeric" maxlength="1" id="p1" oninput="pnext(this,'p2')" onkeydown="pkey(event,null,'p1')">
+      <input type="password" inputmode="numeric" maxlength="1" id="p2" oninput="pnext(this,'p3')" onkeydown="pkey(event,'p1','p2')">
+      <input type="password" inputmode="numeric" maxlength="1" id="p3" oninput="pnext(this,'p4')" onkeydown="pkey(event,'p2','p3')">
+      <input type="password" inputmode="numeric" maxlength="1" id="p4" oninput="pnext(this,null)" onkeydown="pkey(event,'p3','p4')">
+    </div>
+    <div class="pin-err" id="perr"></div>
+    <div class="ma" style="justify-content:center;margin-top:.75rem">
+      <button class="btn bs" onclick="closeOv('movpin')">Cancel</button>
+      <button class="btn bp" onclick="checkPIN()">Unlock</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, doc, getDocs, addDoc, setDoc, deleteDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const app = initializeApp({
+  apiKey: "AIzaSyB6Wki5Td6gs7z3MF4F9VfU5yKz5kiAChQ",
+  authDomain: "urumwewamurage.firebaseapp.com",
+  projectId: "urumwewamurage",
+  storageBucket: "urumwewamurage.firebasestorage.app",
+  messagingSenderId: "569769685266",
+  appId: "1:569769685266:web:3d320eba329369cd3303cb"
+});
+const db = getFirestore(app);
+
+let members = [], contributions = [], chart = null, isAdmin = false, isLoggedIn = false;
+const PIN = "1930";
+const MEMBER_PIN = "1960";
+const COLORS = ['#2d6a4f','#1a5276','#b5830a','#7b241c','#6c3483','#0e6655','#935116','#1a5c2c'];
+const ABG = ['#d8f3dc','#eaf2fb','#fef9ec','#fde8e6','#f3e5f5','#e8f5e9','#fff3e0','#e8eaf6'];
+const ATX = ['#2d6a4f','#1a5276','#b5830a','#c0392b','#6c3483','#1b5e20','#e65100','#283593'];
+
+const fmt = n => 'KES ' + Math.round(n).toLocaleString();
+const fmtS = n => n>=1000000?'KES '+(n/1000000).toFixed(1)+'M':n>=1000?'KES '+Math.round(n/1000)+'K':'KES '+Math.round(n);
+const ini = name => name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+const gm = () => document.getElementById('gmonth').value;
+const gml = () => { const [y,m]=gm().split('-'); return new Date(y,m-1).toLocaleString('default',{month:'long',year:'numeric'}); };
+const el = id => document.getElementById(id);
+
+function sync(s) {
+  const states = {live:{cls:'dot',txt:'Live'},syncing:{cls:'dot spin',txt:'Syncing...'},offline:{cls:'dot off',txt:'Offline'}};
+  el('sdot').className=states[s].cls; el('stxt').textContent=states[s].txt;
+}
+
+function showToast(msg, col) {
+  const t=el('toast'); t.textContent=msg; t.style.background=col||'var(--accent)';
+  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+function openOv(id){el(id).classList.add('open')}
+function closeOv(id){el(id).classList.remove('open')}
+window.closeOv = closeOv;
+document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')}));
+
+window.nav = (id,btn) => {
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  el('pg-'+id).classList.add('on');
+  if(btn) btn.classList.add('on');
+};
+
+function initMonths() {
+  const sel=el('gmonth'), now=new Date();
+  for(let i=0;i<24;i++){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const o=document.createElement('option');
+    o.value=d.toISOString().slice(0,7);
+    o.textContent=d.toLocaleString('default',{month:'long',year:'numeric'});
+    if(i===0)o.selected=true;
+    sel.appendChild(o);
+  }
+}
+
+// ---- PIN ----
+window.openPIN = function() {
+  if(isAdmin) {
+    isAdmin=false; updateAdminUI(); showToast('Logged out');
+  } else {
+    ['p1','p2','p3','p4'].forEach(id=>el(id).value='');
+    el('perr').textContent='';
+    openOv('movpin');
+    setTimeout(()=>el('p1').focus(),150);
+  }
+};
+
+window.pnext = function(inp, nextId) {
+  if(inp.value.length===1 && nextId) el(nextId).focus();
+  if(!nextId && inp.value.length===1) checkPIN();
+};
+
+window.pkey = function(e, prevId, curId) {
+  if(e.key==='Backspace' && !el(curId).value && prevId) el(prevId).focus();
+};
+
+window.checkPIN = function() {
+  const pin=['p1','p2','p3','p4'].map(id=>el(id).value).join('');
+  if(pin===PIN) {
+    isAdmin=true; closeOv('movpin'); updateAdminUI(); showToast('Admin access granted!');
+  } else {
+    el('perr').textContent='Incorrect PIN. Try again.';
+    ['p1','p2','p3','p4'].forEach(id=>el(id).value='');
+    el('p1').focus();
+  }
+};
+
+// ---- LOGIN PIN ----
+window.lpnext = function(inp, nextId) {
+  if(inp.value.length===1 && nextId) el(nextId).focus();
+  if(!nextId && inp.value.length===1) checkLoginPIN();
+};
+
+window.lpkey = function(e, prevId, curId) {
+  if(e.key==='Backspace' && !el(curId).value && prevId) el(prevId).focus();
+};
+
+window.checkLoginPIN = function() {
+  const pin=['lp1','lp2','lp3','lp4'].map(id=>el(id).value).join('');
+  if(pin===PIN) {
+    // Admin PIN entered on login screen
+    isLoggedIn=true; isAdmin=true;
+    el('loginScreen').style.display='none';
+    el('appShell').style.display='block';
+    updateAdminUI();
+    showToast('Admin access granted!');
+  } else if(pin===MEMBER_PIN) {
+    // Member PIN
+    isLoggedIn=true; isAdmin=false;
+    el('loginScreen').style.display='none';
+    el('appShell').style.display='block';
+    refresh();
+    showToast('Welcome!');
+  } else {
+    el('lerr').textContent='Incorrect PIN. Try again.';
+    ['lp1','lp2','lp3','lp4'].forEach(id=>el(id).value='');
+    el('lp1').focus();
+  }
+};
+
+function updateAdminUI() {
+  const btn=el('pinBtn'), txt=el('pinBtnTxt');
+  if(isAdmin){ btn.classList.add('unlocked'); txt.textContent='Admin Mode'; }
+  else { btn.classList.remove('unlocked'); txt.textContent='Admin Login'; }
+  refresh();
+}
+
+function addBtn(icon, label, onclick) {
+  return `<button class="btn bp" onclick="${onclick}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:14px;height:14px;stroke-width:2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>${label}</button>`;
+}
+
+function updateHeaderBtns() {
+  const vob = isAdmin ? '' : '<div class="vob">&#128274; View-only mode &mdash; tap <strong>Admin Login</strong> to record contributions</div>';
+  el('dashVOB').innerHTML = vob;
+  el('dashAddBtn').innerHTML = isAdmin ? addBtn('','Add Contribution',"openContrib()") : '';
+  el('memberAddBtn').innerHTML = isAdmin ? addBtn('','Add Member',"openMember()") : '';
+  el('contribAddBtn').innerHTML = isAdmin ? addBtn('','Add Contribution',"openContrib()") : '';
+}
+
+// ---- SEED DATA ----
+const DM = [
+  {id:'1',name:'Edward Mwangi',phone:'',role:'Member'},
+  {id:'2',name:'Magdaline Chege',phone:'',role:'Member'},
+  {id:'4',name:'Mary Murage',phone:'',role:'Member'},
+  {id:'6',name:'Dennis Njoroge',phone:'',role:'Member'},
+  {id:'7',name:'Barke Njoroge',phone:'',role:'Member'},
+  {id:'9',name:'Antony Njogu',phone:'',role:'Member'},
+  {id:'10',name:'Keziah Miano',phone:'',role:'Member'},
+  {id:'11',name:'Oliviah Mbugua',phone:'',role:'Member'},
+  {id:'12',name:'Oliviah Wangari',phone:'',role:'Member'},
+  {id:'14',name:'Murage Macharia',phone:'',role:'Member'},
+  {id:'15',name:'Timothy Mwangi',phone:'',role:'Member'},
+  {id:'16',name:'Peninah Mwangi',phone:'',role:'Member'},
+  {id:'17',name:'Grace Mwangi',phone:'',role:'Member'},
+  {id:'18',name:'Maina Njogu',phone:'',role:'Member'},
+  {id:'19',name:'Gachanja Macharia',phone:'',role:'Member'},
+  {id:'20',name:'Elizabeth Waruguru',phone:'',role:'Member'},
+  {id:'21',name:'George Njoroge',phone:'',role:'Member'},
+  {id:'22',name:'Marion Wanjiru',phone:'',role:'Member'},
+  {id:'23',name:'Millicent Murage',phone:'',role:'Member'},
+  {id:'24',name:'Keziah Mwangi',phone:'',role:'Member'},
+  {id:'25',name:'Njoroge Njogu',phone:'',role:'Member'},
+  {id:'26',name:'Antony Mwangi',phone:'',role:'Member'},
+  {id:'27',name:'Mirlan Njoroge',phone:'',role:'Member'},
+  {id:'28',name:'Karen Murage',phone:'',role:'Member'},
+  {id:'29',name:'Agnes Njogu',phone:'',role:'Member'},
+  {id:'30',name:'John Njogu',phone:'',role:'Member'},
+];
+const DC = [
+  {memberId:'9',amount:300,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'10',amount:300,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'11',amount:300,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'15',amount:300,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'16',amount:300,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'19',amount:300,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'14',amount:300,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'14',amount:300,month:'2026-02',method:'M-Pesa',recorder:'Admin',date:'2026-02-01'},
+  {memberId:'18',amount:500,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'12',amount:500,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'22',amount:300,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'25',amount:300,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'23',amount:300,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'17',amount:300,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'17',amount:300,month:'2026-02',method:'M-Pesa',recorder:'Admin',date:'2026-02-01'},
+  {memberId:'17',amount:300,month:'2026-03',method:'M-Pesa',recorder:'Admin',date:'2026-03-01'},
+  {memberId:'26',amount:300,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'4',amount:300,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'1',amount:500,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'2',amount:500,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'24',amount:300,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'28',amount:300,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'27',amount:300,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'20',amount:300,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'21',amount:300,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'28',amount:300,month:'2026-02',method:'M-Pesa',recorder:'Admin',date:'2026-02-01'},
+  {memberId:'27',amount:300,month:'2026-02',method:'M-Pesa',recorder:'Admin',date:'2026-02-01'},
+  {memberId:'20',amount:300,month:'2026-02',method:'M-Pesa',recorder:'Admin',date:'2026-02-01'},
+  {memberId:'21',amount:300,month:'2026-02',method:'M-Pesa',recorder:'Admin',date:'2026-02-01'},
+  {memberId:'1',amount:500,month:'2026-02',method:'M-Pesa',recorder:'Admin',date:'2026-02-01'},
+  {memberId:'2',amount:500,month:'2026-02',method:'M-Pesa',recorder:'Admin',date:'2026-02-01'},
+  {memberId:'19',amount:300,month:'2026-02',method:'M-Pesa',recorder:'Admin',date:'2026-02-01'},
+  {memberId:'23',amount:300,month:'2026-02',method:'M-Pesa',recorder:'Admin',date:'2026-02-01'},
+  {memberId:'12',amount:300,month:'2026-02',method:'M-Pesa',recorder:'Admin',date:'2026-02-01'},
+  {memberId:'9',amount:300,month:'2026-02',method:'M-Pesa',recorder:'Admin',date:'2026-02-01'},
+  {memberId:'10',amount:300,month:'2026-02',method:'M-Pesa',recorder:'Admin',date:'2026-02-01'},
+  {memberId:'15',amount:300,month:'2026-02',method:'M-Pesa',recorder:'Admin',date:'2026-02-01'},
+  {memberId:'16',amount:300,month:'2026-02',method:'M-Pesa',recorder:'Admin',date:'2026-02-01'},
+  {memberId:'18',amount:500,month:'2026-02',method:'M-Pesa',recorder:'Admin',date:'2026-02-01'},
+  {memberId:'29',amount:300,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'29',amount:300,month:'2026-02',method:'M-Pesa',recorder:'Admin',date:'2026-02-01'},
+  {memberId:'30',amount:300,month:'2026-01',method:'M-Pesa',recorder:'Admin',date:'2026-01-01'},
+  {memberId:'30',amount:300,month:'2026-02',method:'M-Pesa',recorder:'Admin',date:'2026-02-01'},
+  {memberId:'28',amount:300,month:'2026-03',method:'M-Pesa',recorder:'Admin',date:'2026-03-01'},
+  {memberId:'27',amount:300,month:'2026-03',method:'M-Pesa',recorder:'Admin',date:'2026-03-01'},
+  {memberId:'26',amount:300,month:'2026-03',method:'M-Pesa',recorder:'Admin',date:'2026-03-01'},
+  {memberId:'4',amount:300,month:'2026-03',method:'M-Pesa',recorder:'Admin',date:'2026-03-01'},
+  {memberId:'1',amount:500,month:'2026-03',method:'M-Pesa',recorder:'Admin',date:'2026-03-01'},
+  {memberId:'2',amount:500,month:'2026-03',method:'M-Pesa',recorder:'Admin',date:'2026-03-01'},
+  {memberId:'19',amount:300,month:'2026-03',method:'M-Pesa',recorder:'Admin',date:'2026-03-01'},
+  {memberId:'14',amount:300,month:'2026-03',method:'M-Pesa',recorder:'Admin',date:'2026-03-01'},
+  {memberId:'14',amount:300,month:'2026-04',method:'M-Pesa',recorder:'Admin',date:'2026-04-01'},
+  {memberId:'12',amount:300,month:'2026-03',method:'M-Pesa',recorder:'Admin',date:'2026-03-01'},
+  {memberId:'15',amount:300,month:'2026-03',method:'M-Pesa',recorder:'Admin',date:'2026-03-01'},
+  {memberId:'16',amount:300,month:'2026-03',method:'M-Pesa',recorder:'Admin',date:'2026-03-01'},
+  {memberId:'9',amount:300,month:'2026-03',method:'M-Pesa',recorder:'Admin',date:'2026-03-01'},
+  {memberId:'10',amount:300,month:'2026-03',method:'M-Pesa',recorder:'Admin',date:'2026-03-01'},
+  {memberId:'18',amount:500,month:'2026-03',method:'M-Pesa',recorder:'Admin',date:'2026-03-01'},
+  {memberId:'29',amount:300,month:'2026-03',method:'M-Pesa',recorder:'Admin',date:'2026-03-01'},
+  {memberId:'30',amount:300,month:'2026-03',method:'M-Pesa',recorder:'Admin',date:'2026-03-01'},
+  {memberId:'15',amount:300,month:'2026-04',method:'M-Pesa',recorder:'Admin',date:'2026-04-01'},
+  {memberId:'16',amount:300,month:'2026-04',method:'M-Pesa',recorder:'Admin',date:'2026-04-01'},
+  {memberId:'9',amount:300,month:'2026-04',method:'M-Pesa',recorder:'Admin',date:'2026-04-01'},
+  {memberId:'10',amount:300,month:'2026-04',method:'M-Pesa',recorder:'Admin',date:'2026-04-01'},
+  {memberId:'17',amount:300,month:'2026-04',method:'M-Pesa',recorder:'Admin',date:'2026-04-01'},
+  {memberId:'22',amount:300,month:'2026-04',method:'M-Pesa',recorder:'Admin',date:'2026-04-01'},
+  {memberId:'1',amount:500,month:'2026-04',method:'M-Pesa',recorder:'Admin',date:'2026-04-01'},
+  {memberId:'2',amount:500,month:'2026-04',method:'M-Pesa',recorder:'Admin',date:'2026-04-01'},
+  {memberId:'28',amount:300,month:'2026-04',method:'M-Pesa',recorder:'Admin',date:'2026-04-01'},
+  {memberId:'27',amount:300,month:'2026-04',method:'M-Pesa',recorder:'Admin',date:'2026-04-01'},
+  {memberId:'23',amount:300,month:'2026-04',method:'M-Pesa',recorder:'Admin',date:'2026-04-01'},
+  {memberId:'19',amount:300,month:'2026-04',method:'M-Pesa',recorder:'Admin',date:'2026-04-01'},
+  {memberId:'18',amount:500,month:'2026-04',method:'M-Pesa',recorder:'Admin',date:'2026-04-01'},
+  {memberId:'29',amount:300,month:'2026-04',method:'M-Pesa',recorder:'Admin',date:'2026-04-01'},
+  {memberId:'30',amount:300,month:'2026-04',method:'M-Pesa',recorder:'Admin',date:'2026-04-01'},
+];
+
+async function init() {
+  try {
+    sync('syncing');
+    // One-time seed flag — prevents any future re-seeding
+    const metaSnap = await getDocs(collection(db,'meta'));
+    const alreadySeeded = metaSnap.docs.some(d=>d.id==='seeded' && d.data().version>=3);
+
+    if(!alreadySeeded) {
+      // Clean wipe of any inflated data then seed correctly once
+      const oldC = await getDocs(collection(db,'contributions'));
+      for(const d of oldC.docs) await deleteDoc(doc(db,'contributions',d.id));
+      const oldM = await getDocs(collection(db,'members'));
+      for(const d of oldM.docs) await deleteDoc(doc(db,'members',d.id));
+      for(const m of DM) await setDoc(doc(db,'members',m.id),{name:m.name,phone:m.phone,role:m.role,joined:'2026-01-01'});
+      for(const c of DC) await addDoc(collection(db,'contributions'),c);
+      await setDoc(doc(db,'meta','seeded'),{seededAt:new Date().toISOString(),version:3});
+    }
+    // All future data is managed through the app only — no more seeding
+
+    onSnapshot(collection(db,'members'), s => {
+      members = s.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>Number(a.id)-Number(b.id));
+      el('mcnt').textContent = members.length;
+      refresh();
+    });
+    onSnapshot(collection(db,'contributions'), s => {
+      contributions = s.docs.map(d=>({...d.data(),id:d.id}));
+      refresh();
+    });
+    el('ldr').style.display='none';
+    sync('live');
+  } catch(e) {
+    console.error(e);
+    sync('offline');
+    el('ldr').style.display='none';
+    showToast('Connection failed','#c0392b');
+  }
+}
+
+// ---- MEMBERS ----
+window.openMember = function(id) {
+  if(!isAdmin){showToast('Admin access required','#c0392b');return;}
+  el('mmtitle').textContent = id?'Edit Member':'Add Member';
+  el('meid').value = id||'';
+  if(id){const m=members.find(x=>x.id===id);el('mn').value=m.name||'';el('mp').value=m.phone||'';el('mr').value=m.role||'Member';}
+  else{el('mn').value='';el('mp').value='';el('mr').value='Member';}
+  openOv('movm');
+};
+
+window.saveMember = async function() {
+  if(!isAdmin){showToast('Admin access required','#c0392b');return;}
+  const name=el('mn').value.trim(), phone=el('mp').value.trim(), role=el('mr').value, eid=el('meid').value;
+  if(!name){showToast('Enter a name','#c0392b');return;}
+  sync('syncing');
+  try {
+    if(eid){await setDoc(doc(db,'members',eid),{name,phone,role,joined:'2026-01-01'});showToast('Member updated!');}
+    else{await addDoc(collection(db,'members'),{name,phone,role,joined:new Date().toISOString().slice(0,10)});showToast('Member added!');}
+    closeOv('movm');
+  } catch(e){showToast('Error saving','#c0392b');sync('offline');}
+};
+
+window.delMember = async function(id) {
+  if(!isAdmin){showToast('Admin access required','#c0392b');return;}
+  if(!confirm('Delete this member and all their contributions?')) return;
+  sync('syncing');
+  try {
+    await deleteDoc(doc(db,'members',id));
+    for(const c of contributions.filter(x=>x.memberId===id)) await deleteDoc(doc(db,'contributions',c.id));
+    showToast('Deleted','#c0392b');
+  } catch(e){showToast('Error','#c0392b');sync('offline');}
+};
+
+function renderMembers() {
+  const g=el('mgrid'), month=gm();
+  if(!members.length){g.innerHTML='<div class="empty" style="grid-column:1/-1">No members yet.</div>';return;}
+  g.innerHTML=members.map((m,i)=>{
+    const bg=ABG[i%ABG.length],tx=ATX[i%ATX.length];
+    const tot=contributions.filter(c=>c.memberId===m.id).reduce((a,c)=>a+c.amount,0);
+    const paid=contributions.some(c=>c.memberId===m.id&&c.month===month);
+    const adminBtns = isAdmin
+      ? `<button onclick="openMember('${m.id}')">Edit</button><button onclick="delMember('${m.id}')" style="color:var(--red)">Delete</button>`
+      : '';
+    return `<div class="mcard">
+      <div class="mst ${paid?'p':'u'}"></div>
+      <div class="av" style="background:${bg};color:${tx}">${ini(m.name)}</div>
+      <div class="mname">${m.name}</div>
+      <div class="mphone">${m.phone||'&mdash;'} &middot; ${m.role}</div>
+      <div class="mtot">KES ${tot.toLocaleString()} total</div>
+      <div class="mbtns"><button onclick="openHist('${m.id}')">History</button>${adminBtns}</div>
+    </div>`;
+  }).join('');
+}
+
+// ---- CONTRIBUTIONS ----
+window.openContrib = function(mid) {
+  if(!isAdmin){showToast('Admin access required','#c0392b');return;}
+  if(!members.length){showToast('Add members first','#c0392b');return;}
+  const sel=el('cm');
+  sel.innerHTML=members.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
+  if(mid) sel.value=mid;
+  el('ca').value=''; el('cmo').value=gm(); el('cme').value='M-Pesa'; el('cr').value='';
+  el('cmSearch').value='';
+  openOv('movc');
+};
+
+window.saveContrib = async function() {
+  if(!isAdmin){showToast('Admin access required','#c0392b');return;}
+  const memberId=el('cm').value, amount=parseFloat(el('ca').value), month=el('cmo').value;
+  const method=el('cme').value, recorder=el('cr').value.trim()||'Admin';
+  if(!memberId){showToast('Select a member','#c0392b');return;}
+  if(!amount||amount<=0){showToast('Enter a valid amount','#c0392b');return;}
+  if(!month){showToast('Select a month','#c0392b');return;}
+  sync('syncing');
+  try {
+    await addDoc(collection(db,'contributions'),{memberId,amount,month,method,recorder,date:new Date().toISOString().slice(0,10)});
+    closeOv('movc'); showToast('Contribution saved!');
+  } catch(e){showToast('Error saving','#c0392b');sync('offline');}
+};
+
+window.delContrib = async function(id) {
+  if(!isAdmin){showToast('Admin access required','#c0392b');return;}
+  if(!confirm('Delete this contribution?')) return;
+  sync('syncing');
+  try {await deleteDoc(doc(db,'contributions',id)); showToast('Deleted','#c0392b');}
+  catch(e){showToast('Error','#c0392b');sync('offline');}
+};
+
+const mbadge = m => m==='M-Pesa'?'mpesa':m==='Bank Transfer'?'bank':'cash';
+
+function renderContribs() {
+  const e=el('ctable');
+  if(!contributions.length){e.innerHTML='<div class="empty" style="padding:2.5rem">No contributions yet.</div>';return;}
+  const sorted=[...contributions].sort((a,b)=>b.month.localeCompare(a.month));
+  e.innerHTML=`<table><thead><tr><th>Member</th><th>Month</th><th>Amount</th><th>Method</th><th>Recorded By</th><th>Date</th>${isAdmin?'<th></th>':''}</tr></thead><tbody>
+  ${sorted.map(c=>{
+    const m=members.find(x=>x.id===c.memberId);
+    const [y,mo]=c.month.split('-');
+    const lbl=new Date(y,mo-1).toLocaleString('default',{month:'short',year:'numeric'});
+    return `<tr>
+      <td style="font-weight:600">${m?m.name:'Unknown'}</td><td>${lbl}</td>
+      <td style="font-weight:700;color:var(--accent)">${fmt(c.amount)}</td>
+      <td><span class="bx ${mbadge(c.method)}">${c.method}</span></td>
+      <td style="color:var(--muted)">${c.recorder}</td>
+      <td style="color:var(--muted)">${c.date||''}</td>
+      ${isAdmin?`<td><button class="xbtn" onclick="delContrib('${c.id}')">&#x2715;</button></td>`:''}
+    </tr>`;
+  }).join('')}</tbody></table>`;
+}
+
+window.openHist = function(mid) {
+  const m=members.find(x=>x.id===mid); if(!m) return;
+  const hist=contributions.filter(c=>c.memberId===mid).sort((a,b)=>b.month.localeCompare(a.month));
+  const tot=hist.reduce((a,c)=>a+c.amount,0);
+  el('hmtitle').textContent=m.name+"'s History";
+  el('hcontent').innerHTML=`
+    <div style="display:flex;gap:10px;margin-bottom:1.1rem">
+      <div style="flex:1;background:var(--accent-light);border-radius:8px;padding:11px;text-align:center">
+        <div style="font-size:10px;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">Total Paid</div>
+        <div style="font-size:19px;font-weight:700;color:var(--accent);font-family:var(--font-display)">KES ${tot.toLocaleString()}</div>
+      </div>
+      <div style="flex:1;background:var(--surface2);border-radius:8px;padding:11px;text-align:center">
+        <div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">Months Paid</div>
+        <div style="font-size:19px;font-weight:700;font-family:var(--font-display)">${hist.length}</div>
+      </div>
+    </div>
+    ${hist.length?hist.map(c=>{
+      const [y,mo]=c.month.split('-');
+      const lbl=new Date(y,mo-1).toLocaleString('default',{month:'long',year:'numeric'});
+      return `<div class="hi">
+        <div><div style="font-weight:600;font-size:13px">${lbl}</div><div style="font-size:11.5px;color:var(--muted)">${c.method} &middot; by ${c.recorder} &middot; ${c.date||''}</div></div>
+        <div style="font-weight:700;color:var(--accent);font-size:13.5px">KES ${c.amount.toLocaleString()}</div>
+      </div>`;
+    }).join(''):'<div class="empty">No contributions yet.</div>'}`;
+  openOv('movh');
+};
+
+function renderDash() {
+  const month=gm(), mc=contributions.filter(c=>c.month===month);
+  const col=mc.reduce((a,c)=>a+c.amount,0), tot=contributions.reduce((a,c)=>a+c.amount,0);
+  const pids=[...new Set(mc.map(c=>c.memberId))], unp=Math.max(0,members.length-pids.length);
+  el('d-col').textContent=fmtS(col); el('d-mlbl').textContent=gml();
+  el('d-tot').textContent=fmtS(tot); el('d-paid').textContent=pids.length;
+  el('d-psub').textContent='of '+members.length+' members';
+  el('d-unp').textContent=unp; el('ucnt').textContent=unp;
+
+  const now=new Date();
+  const m6=Array.from({length:6},(_,i)=>{const d=new Date(now.getFullYear(),now.getMonth()-(5-i),1);return d.toISOString().slice(0,7);});
+  const clbls=m6.map(m=>{const [y,mo]=m.split('-');return new Date(y,mo-1).toLocaleString('default',{month:'short'});});
+  const cdata=m6.map(m=>contributions.filter(c=>c.month===m).reduce((a,c)=>a+c.amount,0));
+  if(chart) chart.destroy();
+  chart=new Chart(el('chart'),{
+    type:'bar',
+    data:{labels:clbls,datasets:[{data:cdata,backgroundColor:m6.map(m=>m===month?'#2d6a4f':'#74c69d'),borderRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{y:{ticks:{callback:v=>v>=1000?'KES '+(v/1000)+'K':'KES '+v,font:{size:11},color:'#8c8279'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}},
+              x:{ticks:{font:{size:11},color:'#8c8279'},grid:{display:false},border:{display:false}}}}
+  });
+
+  const tots=members.map(m=>({name:m.name,tot:contributions.filter(c=>c.memberId===m.id).reduce((a,c)=>a+c.amount,0)})).sort((a,b)=>b.tot-a.tot);
+  const mx=tots[0]?.tot||1;
+  el('rtots').innerHTML=tots.length?tots.map((t,i)=>`
+    <div class="pw"><div class="pm"><span class="pn">${t.name}</span><span class="pv">KES ${t.tot.toLocaleString()}</span></div>
+    <div class="pt2"><div class="pf" style="width:${Math.round(t.tot/mx*100)}%;background:${COLORS[i%COLORS.length]}"></div></div></div>`).join(''):'<div class="empty">No data.</div>';
+
+  el('mstatus').innerHTML=members.length?`<table><thead><tr><th>Member</th><th>Phone</th><th>Status</th><th>Amount</th><th>Method</th>${isAdmin?'<th></th>':''}</tr></thead><tbody>
+  ${members.map(m=>{
+    const c=mc.find(x=>x.memberId===m.id);
+    return `<tr>
+      <td style="font-weight:600">${m.name}</td>
+      <td style="color:var(--muted)">${m.phone||'&mdash;'}</td>
+      <td><span class="bx ${c?'paid':'unpaid'}">${c?'&#10003; Paid':'&#10007; Unpaid'}</span></td>
+      <td style="font-weight:${c?700:400};color:${c?'var(--accent)':'var(--muted)'}">${c?fmt(c.amount):'&mdash;'}</td>
+      <td>${c?`<span class="bx ${mbadge(c.method)}">${c.method}</span>`:'&mdash;'}</td>
+      ${isAdmin?`<td>${!c?`<button class="btn bp" style="padding:4px 11px;font-size:11.5px" onclick="openContrib('${m.id}')">Record</button>`:''}</td>`:''}
+    </tr>`;
+  }).join('')}</tbody></table>`:'<div class="empty">No members yet.</div>';
+}
+
+function renderUnpaid() {
+  const month=gm(); el('ulbl').textContent=gml();
+  const pids=new Set(contributions.filter(c=>c.month===month).map(c=>c.memberId));
+  const unp=members.filter(m=>!pids.has(m.id));
+  const e=el('ulist');
+  if(!unp.length){e.innerHTML='<div class="empty">&#127881; Everyone has paid this month!</div>';return;}
+  e.innerHTML=unp.map((m,i)=>{
+    const bg=ABG[i%ABG.length],tx=ATX[i%ATX.length];
+    return `<div class="ui">
+      <div style="width:36px;height:36px;background:${bg};color:${tx};border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0">${ini(m.name)}</div>
+      <div style="flex:1"><div style="font-weight:600;font-size:13px">${m.name}</div><div style="font-size:11.5px;color:var(--muted)">${m.phone||'No phone'} &middot; ${m.role}</div></div>
+      ${isAdmin?`<button class="btn bp" style="padding:6px 13px;font-size:12px" onclick="openContrib('${m.id}')">Record</button>`:'<span style="font-size:12px;color:var(--muted)">Not paid</span>'}
+    </div>`;
+  }).join('');
+}
+
+window.filterMembers = function() {
+  const q = document.getElementById('memberSearch').value.toLowerCase();
+  document.querySelectorAll('#mgrid .mcard').forEach(card => {
+    const name = card.querySelector('.mname').textContent.toLowerCase();
+    card.style.display = name.includes(q) ? '' : 'none';
+  });
+};
+
+window.filterContribSelect = function() {
+  const q = document.getElementById('cmSearch').value.toLowerCase();
+  const sel = document.getElementById('cm');
+  Array.from(sel.options).forEach(opt => {
+    opt.style.display = opt.text.toLowerCase().includes(q) ? '' : 'none';
+  });
+  // Auto-select first visible
+  const first = Array.from(sel.options).find(o => o.style.display !== 'none');
+  if(first) sel.value = first.value;
+};
+
+window.refresh = function() {
+  updateHeaderBtns();
+  renderMembers(); renderContribs(); renderDash(); renderUnpaid();
+};
+
+window.exportCSV = function() {
+  if(!contributions.length){showToast('No data to export');return;}
+  const rows=contributions.map(c=>{const m=members.find(x=>x.id===c.memberId);return [c.date||'',`"${m?m.name:'Unknown'}"`,c.month,c.amount,c.method,c.recorder].join(',');});
+  const csv=['Date,Member,Month,Amount,Method,Recorded By',...rows].join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='urumwe-wa-murage-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click(); showToast('CSV exported!');
+};
+
+initMonths();
+init();
+setTimeout(()=>{ if(el('lp1')) el('lp1').focus(); }, 300);
+</script>
+</body>
+</html>
